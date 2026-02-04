@@ -38,6 +38,21 @@ const statusLabels: Record<TaskStatus, string> = {
   done: "Done",
 };
 
+const priorityLabels: Record<TaskPriority, string> = {
+  low: "Low",
+  medium: "Medium",
+  high: "High",
+};
+
+const emptyForm: TaskFormState = {
+  title: "",
+  description: "",
+  tags: "",
+  priority: "medium",
+  status: "todo",
+  dueDate: new Date().toISOString().slice(0, 10),
+};
+
 const focusCards = [
   {
     title: "Priority radar",
@@ -55,6 +70,23 @@ const focusCards = [
     tone: "from-emerald-500/15 via-emerald-500/10 to-transparent text-emerald-600 dark:text-emerald-300",
   },
 ];
+
+const parseTags = (value: string) =>
+  value
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+
+const formatDate = (value: string) => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+  }).format(date);
+};
 
 export default function HomePage() {
   const [theme, setTheme] = useState<Theme>("light");

@@ -4,8 +4,29 @@
 
 :root {
   color-scheme: light;
+  --bg: #f4f5f9;
+  --bg-accent: #e6e9f2;
+  --text: #0f172a;
+  --muted: #4b5563;
+  --card: rgba(255, 255, 255, 0.6);
+  --card-border: rgba(148, 163, 184, 0.4);
+  --shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+  --accent: #4f46e5;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0b1120;
+  --bg-accent: #111827;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --card: rgba(15, 23, 42, 0.7);
+  --card-border: rgba(148, 163, 184, 0.2);
+  --shadow: 0 24px 48px rgba(15, 23, 42, 0.45);
+  --accent: #818cf8;
 }
 
 body {
-  @apply bg-white text-slate-900;
+  background: radial-gradient(circle at top, var(--bg-accent), var(--bg));
+  color: var(--text);
 }

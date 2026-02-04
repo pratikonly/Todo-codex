@@ -1,14 +1,94 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Theme = "light" | "dark";
+
+type TaskStatus = "todo" | "in-progress" | "blocked" | "done";
+type TaskPriority = "low" | "medium" | "high";
+
+type Task = {
+  title: string;
+  description: string;
+  tags: string[];
+  priority: TaskPriority;
+  dueDate: string;
+  status: TaskStatus;
+  createdAt: string;
+};
 
 const glassCard =
   "rounded-3xl border border-[var(--card-border)] bg-[var(--card)] shadow-[var(--shadow)] backdrop-blur-xl";
 
+const tasks: Task[] = [
+  {
+    title: "Refine onboarding flow",
+    description: "Audit the first-time experience and tighten the copy.",
+    tags: ["design", "growth"],
+    priority: "high",
+    dueDate: "2024-07-22",
+    status: "in-progress",
+    createdAt: "2024-07-10",
+  },
+  {
+    title: "QA weekly release",
+    description: "Run regression and document any high-impact issues.",
+    tags: ["qa", "release"],
+    priority: "medium",
+    dueDate: "2024-07-18",
+    status: "blocked",
+    createdAt: "2024-07-08",
+  },
+  {
+    title: "Draft roadmap update",
+    description: "Align with leadership on Q3 priorities and risks.",
+    tags: ["strategy"],
+    priority: "high",
+    dueDate: "2024-07-25",
+    status: "todo",
+    createdAt: "2024-07-09",
+  },
+  {
+    title: "Customer follow-up summaries",
+    description: "Send recap notes and capture next-step owners.",
+    tags: ["customer", "ops"],
+    priority: "low",
+    dueDate: "2024-07-16",
+    status: "done",
+    createdAt: "2024-07-05",
+  },
+  {
+    title: "Sync with marketing",
+    description: "Confirm launch dates for the new campaign pages.",
+    tags: ["marketing"],
+    priority: "medium",
+    dueDate: "2024-07-20",
+    status: "in-progress",
+    createdAt: "2024-07-07",
+  },
+  {
+    title: "Prototype usability test",
+    description: "Recruit 5 users and schedule the moderated session.",
+    tags: ["research", "design"],
+    priority: "medium",
+    dueDate: "2024-07-19",
+    status: "todo",
+    createdAt: "2024-07-06",
+  },
+];
+
+const statusLabels: Record<TaskStatus, string> = {
+  todo: "To do",
+  "in-progress": "In progress",
+  blocked: "Blocked",
+  done: "Done",
+};
+
 export default function HomePage() {
   const [theme, setTheme] = useState<Theme>("light");
+  const [statusFilter, setStatusFilter] = useState<TaskStatus | "all">("all");
+  const [tagFilter, setTagFilter] = useState<string>("all");
+  const [priorityFilter, setPriorityFilter] = useState<TaskPriority | "all">("all");
 
   useEffect(() => {
     const storedTheme = window.localStorage.getItem("theme") as Theme | null;
@@ -26,6 +106,28 @@ export default function HomePage() {
   const handleToggle = () => {
     setTheme((current) => (current === "light" ? "dark" : "light"));
   };
+
+  const filteredTasks = useMemo(() => {
+    return tasks.filter((task) => {
+      if (statusFilter !== "all" && task.status !== statusFilter) {
+        return false;
+      }
+      if (priorityFilter !== "all" && task.priority !== priorityFilter) {
+        return false;
+      }
+      if (tagFilter !== "all" && !task.tags.includes(tagFilter)) {
+        return false;
+      }
+      return true;
+    });
+  }, [priorityFilter, statusFilter, tagFilter]);
+
+  const totalTasks = tasks.length;
+  const completedTasks = tasks.filter((task) => task.status === "done").length;
+  const progressPercent = Math.round((completedTasks / totalTasks) * 100);
+  const activeTasks = tasks.filter((task) => task.status === "in-progress").length;
+  const blockedTasks = tasks.filter((task) => task.status === "blocked").length;
+  const uniqueTags = Array.from(new Set(tasks.flatMap((task) => task.tags)));
 
   return (
     <main className="min-h-screen px-6 py-12 sm:px-10">
@@ -53,105 +155,155 @@ export default function HomePage() {
               {theme === "light" ? "Dark mode" : "Light mode"}
             </button>
           </div>
-          <div className="grid gap-4 text-sm text-[var(--muted)] sm:grid-cols-3">
-            <div className="rounded-2xl border border-[var(--card-border)] bg-white/30 p-4 dark:bg-white/5">
-              <p className="text-xs uppercase tracking-[0.2em]">Focus</p>
-              <p className="mt-2 text-xl font-semibold text-[var(--text)]">3 deep work blocks</p>
-              <p className="mt-1">Schedule two 90-minute sessions.</p>
+          <div className="grid gap-4 text-sm text-[var(--muted)] lg:grid-cols-[2fr_1fr]">
+            <div className="rounded-2xl border border-[var(--card-border)] bg-white/30 p-5 dark:bg-white/5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em]">Task completion</p>
+                  <p className="mt-2 text-2xl font-semibold text-[var(--text)]">
+                    {completedTasks} of {totalTasks} tasks done
+                  </p>
+                </div>
+                <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-300">
+                  {progressPercent}% complete
+                </span>
+              </div>
+              <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-white/40 dark:bg-white/10">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+              <div className="mt-4 flex flex-wrap gap-4 text-xs uppercase tracking-[0.2em]">
+                <span className="rounded-full bg-white/40 px-3 py-1 dark:bg-white/10">
+                  Active: {activeTasks}
+                </span>
+                <span className="rounded-full bg-white/40 px-3 py-1 dark:bg-white/10">
+                  Blocked: {blockedTasks}
+                </span>
+                <span className="rounded-full bg-white/40 px-3 py-1 dark:bg-white/10">
+                  Due this week: 3
+                </span>
+              </div>
             </div>
-            <div className="rounded-2xl border border-[var(--card-border)] bg-white/30 p-4 dark:bg-white/5">
-              <p className="text-xs uppercase tracking-[0.2em]">Energy</p>
-              <p className="mt-2 text-xl font-semibold text-[var(--text)]">Balanced pace</p>
-              <p className="mt-1">Plan breaks between meetings.</p>
-            </div>
-            <div className="rounded-2xl border border-[var(--card-border)] bg-white/30 p-4 dark:bg-white/5">
-              <p className="text-xs uppercase tracking-[0.2em]">Progress</p>
-              <p className="mt-2 text-xl font-semibold text-[var(--text)]">7 tasks in motion</p>
-              <p className="mt-1">Stay consistent with your flow.</p>
+            <div className="rounded-2xl border border-[var(--card-border)] bg-white/30 p-5 text-xs uppercase tracking-[0.2em] text-[var(--muted)] dark:bg-white/5">
+              <p>Dashboard</p>
+              <p className="mt-3 text-2xl font-semibold normal-case text-[var(--text)]">
+                Momentum is steady
+              </p>
+              <p className="mt-3 normal-case text-[var(--muted)]">
+                Review priorities, adjust filters, and keep the critical items moving forward.
+              </p>
             </div>
           </div>
         </header>
 
-        <section className="grid gap-6 lg:grid-cols-3">
-          <div className={`${glassCard} p-6`}>
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Today</h2>
-              <span className="rounded-full bg-[var(--accent)]/10 px-3 py-1 text-xs font-semibold text-[var(--accent)]">
-                3 tasks
-              </span>
+        <section className={`${glassCard} p-6 sm:p-8`}>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-semibold">Task list</h2>
+              <p className="mt-2 text-sm text-[var(--muted)]">
+                Filter by status, tag, or priority to focus the team&apos;s attention.
+              </p>
             </div>
-            <ul className="mt-6 space-y-4 text-sm">
-              {[
-                "Design the daily highlight card",
-                "Ship the glassmorphism layout",
-                "Review sprint objectives",
-              ].map((item) => (
-                <li
-                  key={item}
-                  className="rounded-2xl border border-[var(--card-border)] bg-white/40 p-4 text-[var(--text)] shadow-sm backdrop-blur-md dark:bg-white/10"
-                >
-                  <p className="font-medium">{item}</p>
-                  <p className="mt-2 text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
-                    Focus block
-                  </p>
-                </li>
-              ))}
-            </ul>
+            <span className="rounded-full bg-[var(--accent)]/10 px-3 py-1 text-xs font-semibold text-[var(--accent)]">
+              Showing {filteredTasks.length} of {totalTasks}
+            </span>
           </div>
 
-          <div className={`${glassCard} p-6`}>
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Upcoming</h2>
-              <span className="rounded-full bg-[var(--accent)]/10 px-3 py-1 text-xs font-semibold text-[var(--accent)]">
-                Next 7 days
-              </span>
-            </div>
-            <div className="mt-6 space-y-4 text-sm">
-              {[
-                { title: "Client kickoff", meta: "Tomorrow · 10:00 AM" },
-                { title: "Prototype review", meta: "Wed · Design team" },
-                { title: "Launch checklist", meta: "Fri · Final polish" },
-              ].map((item) => (
-                <div
-                  key={item.title}
-                  className="rounded-2xl border border-[var(--card-border)] bg-white/40 p-4 text-[var(--text)] shadow-sm backdrop-blur-md dark:bg-white/10"
-                >
-                  <p className="font-medium">{item.title}</p>
-                  <p className="mt-2 text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
-                    {item.meta}
-                  </p>
-                </div>
-              ))}
-            </div>
+          <div className="mt-6 grid gap-4 text-sm sm:grid-cols-3">
+            <label className="rounded-2xl border border-[var(--card-border)] bg-white/30 p-4 dark:bg-white/5">
+              <span className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Status</span>
+              <select
+                className="mt-2 w-full rounded-xl border border-[var(--card-border)] bg-white/60 px-3 py-2 text-sm text-[var(--text)] dark:bg-white/10"
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value as TaskStatus | "all")}
+              >
+                <option value="all">All statuses</option>
+                {Object.entries(statusLabels).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="rounded-2xl border border-[var(--card-border)] bg-white/30 p-4 dark:bg-white/5">
+              <span className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Tags</span>
+              <select
+                className="mt-2 w-full rounded-xl border border-[var(--card-border)] bg-white/60 px-3 py-2 text-sm text-[var(--text)] dark:bg-white/10"
+                value={tagFilter}
+                onChange={(event) => setTagFilter(event.target.value)}
+              >
+                <option value="all">All tags</option>
+                {uniqueTags.map((tag) => (
+                  <option key={tag} value={tag}>
+                    {tag}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="rounded-2xl border border-[var(--card-border)] bg-white/30 p-4 dark:bg-white/5">
+              <span className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Priority</span>
+              <select
+                className="mt-2 w-full rounded-xl border border-[var(--card-border)] bg-white/60 px-3 py-2 text-sm text-[var(--text)] dark:bg-white/10"
+                value={priorityFilter}
+                onChange={(event) =>
+                  setPriorityFilter(event.target.value as TaskPriority | "all")
+                }
+              >
+                <option value="all">All priorities</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </label>
           </div>
 
-          <div className={`${glassCard} p-6`}>
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Completed</h2>
-              <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-500">
-                12 done
-              </span>
-            </div>
-            <ul className="mt-6 space-y-4 text-sm">
-              {[
-                "Finalize Q2 roadmap",
-                "Organize design assets",
-                "Sync with marketing",
-              ].map((item) => (
-                <li
-                  key={item}
-                  className="rounded-2xl border border-[var(--card-border)] bg-white/40 p-4 text-[var(--text)] shadow-sm backdrop-blur-md dark:bg-white/10"
-                >
-                  <div className="flex items-center justify-between">
-                    <p className="font-medium">{item}</p>
-                    <span className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
-                      Done
-                    </span>
+          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+            {filteredTasks.map((task) => (
+              <article
+                key={task.title}
+                className="rounded-2xl border border-[var(--card-border)] bg-white/40 p-5 text-[var(--text)] shadow-sm backdrop-blur-md dark:bg-white/10"
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <h3 className="text-lg font-semibold">{task.title}</h3>
+                    <p className="mt-2 text-sm text-[var(--muted)]">{task.description}</p>
                   </div>
-                </li>
-              ))}
-            </ul>
+                  <span className="rounded-full bg-[var(--accent)]/10 px-3 py-1 text-xs font-semibold text-[var(--accent)]">
+                    {statusLabels[task.status]}
+                  </span>
+                </div>
+                <div className="mt-4 flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
+                  <span className="rounded-full bg-white/40 px-3 py-1 dark:bg-white/10">
+                    Priority: {task.priority}
+                  </span>
+                  <span className="rounded-full bg-white/40 px-3 py-1 dark:bg-white/10">
+                    Due {task.dueDate}
+                  </span>
+                  <span className="rounded-full bg-white/40 px-3 py-1 dark:bg-white/10">
+                    Created {task.createdAt}
+                  </span>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {task.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full border border-[var(--card-border)] bg-white/60 px-3 py-1 text-xs font-semibold text-[var(--text)] dark:bg-white/10"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </article>
+            ))}
           </div>
+
+          {filteredTasks.length === 0 && (
+            <div className="mt-6 rounded-2xl border border-dashed border-[var(--card-border)] bg-white/20 p-8 text-center text-sm text-[var(--muted)] dark:bg-white/5">
+              No tasks match these filters. Try adjusting the criteria.
+            </div>
+          )}
         </section>
       </div>
     </main>

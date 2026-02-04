@@ -38,28 +38,23 @@ const statusLabels: Record<TaskStatus, string> = {
   done: "Done",
 };
 
-const priorityLabels: Record<TaskPriority, string> = {
-  low: "Low",
-  medium: "Medium",
-  high: "High",
-};
-
-const emptyForm: TaskFormState = {
-  title: "",
-  description: "",
-  tags: "",
-  priority: "medium",
-  status: "todo",
-  dueDate: new Date().toISOString().split("T")[0],
-};
-
-const parseTags = (value: string) =>
-  value
-    .split(",")
-    .map((tag) => tag.trim())
-    .filter(Boolean);
-
-const formatDate = (value: string) => new Date(value).toLocaleDateString();
+const focusCards = [
+  {
+    title: "Priority radar",
+    description: "Three high-impact tasks need attention within 72 hours.",
+    tone: "from-rose-500/15 via-rose-500/10 to-transparent text-rose-600 dark:text-rose-300",
+  },
+  {
+    title: "Energy plan",
+    description: "Schedule deep work before 2 PM to clear the blockers.",
+    tone: "from-sky-500/15 via-sky-500/10 to-transparent text-sky-600 dark:text-sky-300",
+  },
+  {
+    title: "Momentum streak",
+    description: "You have completed 4 tasks in a row since Monday.",
+    tone: "from-emerald-500/15 via-emerald-500/10 to-transparent text-emerald-600 dark:text-emerald-300",
+  },
+];
 
 export default function HomePage() {
   const [theme, setTheme] = useState<Theme>("light");
@@ -131,6 +126,10 @@ export default function HomePage() {
   const activeTasks = tasks.filter((task) => task.status === "in_progress").length;
   const blockedTasks = tasks.filter((task) => task.status === "blocked").length;
   const uniqueTags = Array.from(new Set(tasks.flatMap((task) => task.tags)));
+  const upcomingTasks = [...tasks]
+    .filter((task) => task.status !== "done")
+    .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
+    .slice(0, 4);
 
   const handleCreateTask = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -226,7 +225,7 @@ export default function HomePage() {
                 Daily overview
               </p>
               <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">
-                Good morning, you have a focused day ahead.
+                Nimbus keeps your work calm, clear, and in motion.
               </h1>
               <p className="mt-3 max-w-2xl text-sm text-[var(--muted)] sm:text-base">
                 Balance today&apos;s priorities, preview what&apos;s next, and keep an eye on
@@ -284,6 +283,76 @@ export default function HomePage() {
             </div>
           </div>
         </header>
+
+        <section className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+          <div className={`${glassCard} p-6 sm:p-8`}>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--muted)]">
+                  Smart focus
+                </p>
+                <h2 className="mt-2 text-2xl font-semibold">Signals tuned for today</h2>
+                <p className="mt-2 text-sm text-[var(--muted)]">
+                  Personalized nudges surface what matters most. Use them to plan a calmer,
+                  more intentional day.
+                </p>
+              </div>
+              <span className="rounded-full bg-[var(--accent)]/10 px-3 py-1 text-xs font-semibold text-[var(--accent)]">
+                Auto insights
+              </span>
+            </div>
+            <div className="mt-6 grid gap-4 sm:grid-cols-3">
+              {focusCards.map((card) => (
+                <div
+                  key={card.title}
+                  className={`rounded-2xl border border-[var(--card-border)] bg-gradient-to-br ${card.tone} px-4 py-5 text-sm`}
+                >
+                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
+                    {card.title}
+                  </p>
+                  <p className="mt-3 text-sm font-medium text-[var(--text)]">
+                    {card.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className={`${glassCard} flex flex-col gap-5 p-6 sm:p-8`}>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--muted)]">
+                Track ahead
+              </p>
+              <h2 className="mt-2 text-2xl font-semibold">Upcoming checkpoints</h2>
+              <p className="mt-2 text-sm text-[var(--muted)]">
+                Stay aligned with what&apos;s due next and keep the schedule balanced.
+              </p>
+            </div>
+            <div className="space-y-3">
+              {upcomingTasks.map((task) => (
+                <div
+                  key={task.title}
+                  className="rounded-2xl border border-[var(--card-border)] bg-white/40 p-4 text-sm dark:bg-white/10"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="font-semibold text-[var(--text)]">{task.title}</p>
+                      <p className="mt-1 text-xs text-[var(--muted)]">{task.description}</p>
+                    </div>
+                    <span className="rounded-full bg-white/50 px-3 py-1 text-xs font-semibold text-[var(--text)] dark:bg-white/10">
+                      {task.dueDate}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="mt-auto rounded-full border border-[var(--card-border)] bg-white/40 px-4 py-2 text-sm font-semibold text-[var(--text)] transition hover:-translate-y-0.5 hover:bg-white/60 dark:bg-white/10 dark:hover:bg-white/20"
+            >
+              Open timeline
+            </button>
+          </div>
+        </section>
 
         <section className={`${glassCard} p-6 sm:p-8`}>
           <div className="flex flex-wrap items-center justify-between gap-4">

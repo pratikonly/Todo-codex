@@ -1,64 +1,53 @@
-# Nimbus Tasks
+# EduPilot
 
-Nimbus Tasks is a smart to-do and tracking experience with a modern glassmorphism UI, dark/light theme toggle, and a Vercel-ready Next.js App Router setup.
+**Navigate Your Learning Journey**
 
-## Features
-- Glassmorphism UI with light/dark theme toggle.
-- Filterable task list (status, priority, tags).
-- Smart focus insights and upcoming timeline preview.
-- Vercel-ready Next.js App Router build.
+EduPilot is a production-focused full-stack Student Productivity and Study Management SaaS built with **Next.js 14 App Router**, **TypeScript**, **Tailwind CSS**, and **Neon Postgres via Prisma**.
 
-## Vercel deployment
+## Core Highlights
+- Rounded glass dashboard shell with sticky top navigation, desktop side nav, mobile bottom nav, and utility sidebar.
+- Dashboard widgets for study time, streaks, productivity, analytics tabs, and lower secondary widgets.
+- Study tracker with add/edit/delete sessions, offline draft autosave, and Pomodoro focus timer.
+- Protected app routes via middleware and secure cookie-backed session gate.
+- Neon-ready Prisma schema covering users, study logs, streaks, achievements, friends, and notifications.
+- CI workflow for typecheck/build.
 
-1. **Create a Vercel project**
-   - Import this repository in Vercel.
-   - Framework preset: **Next.js**.
+## Tech Stack
+- Next.js 14 + App Router + TypeScript
+- Tailwind CSS
+- Prisma ORM
+- Neon Postgres
 
-2. **Environment variables**
-   - Add the values from `.env.example` in the Vercel project settings.
-   - If you choose Vercel Postgres, Vercel can auto-inject the `POSTGRES_URL` and `POSTGRES_PRISMA_URL` envs.
-
-3. **Build & deploy**
-   - Build command: `npm run build`
-   - Output: Next.js default (handled by Vercel).
-
-## Database recommendations
-
-### Recommended: Vercel Postgres
-- Tightest integration with Vercel.
-- Managed Postgres with serverless-friendly scaling.
-- Use with Prisma or Drizzle.
-
-### Alternative: Supabase
-- Postgres + Auth + Storage in one platform.
-- Great for multi-device sync and user auth.
-
-### Alternative: Neon
-- Serverless Postgres with branching.
-- Works well with Prisma/Drizzle on Vercel.
-
-## Suggested data model (minimal)
-- `Task`
-  - `id` (uuid)
-  - `title` (string)
-  - `description` (text)
-  - `priority` (enum: low/medium/high)
-  - `status` (enum: todo/in-progress/blocked/done)
-  - `tags` (string[])
-  - `dueDate` (date)
-  - `createdAt` (timestamp)
-  - `updatedAt` (timestamp)
-  - `userId` (uuid) — if using auth
-
-## Local development
-
+## Local Setup
 ```bash
 npm install
+cp .env.example .env.local
+npm run db:generate
 npm run dev
 ```
 
-## Production checklist
-- ✅ Add a database provider (Vercel Postgres recommended).
-- ✅ Add API routes (`/app/api/tasks`) for CRUD.
-- ✅ Add auth if you want per-user tasks (NextAuth or Supabase Auth).
-- ✅ Set env variables in Vercel project settings.
+## Environment Variables
+Use `.env.example` and configure:
+- `DATABASE_URL`
+- `DIRECT_URL` (optional)
+- `NEXT_PUBLIC_SITE_URL`
+- `NEXT_PUBLIC_PORTFOLIO_URL`
+
+## Database Setup (Neon)
+```bash
+npm run db:push
+```
+
+## Quality Checks
+```bash
+npm run typecheck
+npm run build
+```
+
+## Deployment (Vercel)
+1. Import the repo into Vercel.
+2. Add env vars from `.env.example`.
+3. Deploy with build command `npm run build`.
+
+## Footer Credit
+The app footer includes a prominent **Made by Pratik** button that links to `NEXT_PUBLIC_PORTFOLIO_URL`.

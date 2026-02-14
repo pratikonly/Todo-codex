@@ -3,18 +3,14 @@ import "./globals.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Nimbus Tasks",
-  description: "A smart, glassmorphism task tracker with a focus on momentum."
+  title: "EduPilot | Navigate Your Learning Journey",
+  description: "Production-ready student productivity and study management SaaS.",
 };
 
-export default function RootLayout({
-  children
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className="font-sans">{children}</body>
     </html>
   );
 }
